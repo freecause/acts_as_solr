@@ -1,0 +1,4 @@
+solr/tmp/*
+solr/logs/*
+solr/solr/data
+*~
