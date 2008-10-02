@@ -88,22 +88,27 @@ module ActsAsSolr #:nodoc:
         configuration[:include].each do |association|
           data = ""
           klass = association.to_s.singularize
+          assoc_doc = Hash.new("")
           case self.class.reflect_on_association(association).macro
           when :has_many, :has_and_belongs_to_many
             records = self.send(association).to_a
             unless records.empty?
-              records.each{|r| data << r.attributes.inject([]){|k,v| k << "#{v.first}=#{ERB::Util.html_escape(v.last)}"}.join(" ")}
-              doc["#{klass}_t"] = data
+              records.each { |r| build_document_attributes(r, klass, assoc_doc) }
+              assoc_doc.each { |k, v| doc[k] = v }
             end
           when :has_one, :belongs_to
             record = self.send(association)
             unless record.nil?
-              data = record.attributes.inject([]){|k,v| k << "#{v.first}=#{ERB::Util.html_escape(v.last)}"}.join(" ")
-              doc["#{klass}_t"] = data
+              build_document_attributes(record, klass, assoc_doc)
+              assoc_doc.each { |k, v| doc[k] = v }
             end
           end
         end
       end
+    end
+
+    def build_document_attributes(record, klass, doc)
+      record.attributes.each { |a| doc["#{klass}_#{a.first}_t"] += ERB::Util.html_escape("#{a.last} ") }
     end
     
     def validate_boost(boost)
