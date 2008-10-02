@@ -1,4 +1,6 @@
 solr/tmp/*
+!solr/tmp/.gitignore
 solr/logs/*
+!solr/logs/.gitignore
 solr/solr/data
 *~
