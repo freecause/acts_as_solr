@@ -1,4 +1,37 @@
 == CHANGE_LOG
+=== 10-01-2008 Version 0.9.1
+<b>NEW</b>:: Forked original acts_as_solr plugin.
+<b>NEW</b>:: Major change to the way associations are stored in solr
+    class Book < ActiveRecord::Base
+      acts_as_solr :include => [:author]
+      has_one :author
+    end
+
+  Previously this association would have been stored as:
+    author_t:first_name=John last_name=Doe id=1
+
+  So basically the entire association was being stored as one long string to be matched against. Now associations are broken into their individual fields:
+    author_first_name_t:John
+    author_last_name_t:Doe
+    author_id_t:1
+
+  This way you can search against associations just like you would in a normal solr search. This also works for has_many associations:
+    class Book < ActiveRecord::Base
+      acts_as_solr :include => [:authors]
+      has_many :authors
+    end
+
+  This is how the data would be stored for this association:
+    author_first_name_t:John Jane
+    author_last_name:Doe Dawn
+    author_id_t:1 2
+  
+<b>NOTE</b>:: While editing this plugin I noticed that acts_as_solr will singularize the association name. If you have found that your association name is not working try launching console to see if the Rails inflector is not doing its job to your liking. A great example is "address":
+  >> "address".singularize
+  => "addres"
+
+  If this is the case with you try reading up on Rails inflectors and how to write your own.
+
 === 06-18-2007: Version 0.9
 <b>NEW</b>:: Added the option :scores when doing a search. If set to true this will return the score as a 'solr_score' attribute or each one of the instances found
   books = Book.find_by_solr 'ruby OR splinter', :scores => true
