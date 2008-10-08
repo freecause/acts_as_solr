@@ -108,7 +108,12 @@ module ActsAsSolr #:nodoc:
     end
 
     def build_document_attributes(record, klass, doc)
-      record.attributes.each { |a| doc["#{klass}_#{a.first}_t"] += ERB::Util.html_escape("#{a.last} ") }
+      if record.respond_to?(:solr_association_fields)
+        debugger
+        record.solr_association_fields.map { |f| doc["#{klass}_#{f}_t"] += ERB::Util.html_escape("#{record[f]} ") }
+      else
+        record.attributes.each { |a| doc["#{klass}_#{a.first}_t"] += ERB::Util.html_escape("#{a.last} ") }
+      end
     end
     
     def validate_boost(boost)

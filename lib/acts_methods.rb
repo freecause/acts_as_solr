@@ -139,6 +139,13 @@ module ActsAsSolr #:nodoc:
 
     end
     
+    def fields_for_solr(*fieldz)
+      cattr_accessor :solr_association_fields
+      
+      self.solr_association_fields = fieldz if fieldz.is_a?(Array)
+    end
+      
+    
     private
     def get_field_value(field)
       configuration[:solr_fields] << field
